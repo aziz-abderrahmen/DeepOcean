@@ -27,4 +27,5 @@ public interface ReadService {
 
 
   public Sound.SOUND getSoundEffect();
+  public int getHealthPoints();
 }

@@ -35,6 +35,7 @@ public class Engine implements EngineService, RequireDataService {
   private double heroesVX, heroesVY;
   public int cpt = 0;
   int score = 0, vitesseJeu = 0;
+  boolean isInvulnerable = false;
 
   public Engine() {
   }
@@ -91,14 +92,23 @@ public class Engine implements EngineService, RequireDataService {
 
         data.setSoundEffect(Sound.SOUND.None);
         int score = 0;
+        
+        if (cpt % 100 == 0) {
+        	isInvulnerable = false;
+        }
 
         for (SharkService p : data.getSharks()) {
           moveLeft(p, score);
 
-          if (collisionHeroesShark(p)) {
+          if (collisionHeroesShark(p) && !isInvulnerable) {
             data.setSoundEffect(Sound.SOUND.HeroesGotHit);
-            gameon = false;
-            stop();
+            data.takeDamage(1);
+            if (data.getHealthPoints() == 0) {
+            	gameon = false;
+            	stop();
+            } else {
+            	isInvulnerable = true;
+            }
           } else {
 
             if (p.getPosition().x > 0 && p.getPosition().x < HardCodedParameters.maxX)
@@ -108,10 +118,15 @@ public class Engine implements EngineService, RequireDataService {
         for (SharkService p : data.getSharks2()) {
           moveRight(p);
 
-          if (collisionHeroesShark(p)) {
+          if (collisionHeroesShark(p) && !isInvulnerable) {
             data.setSoundEffect(Sound.SOUND.HeroesGotHit);
-            gameon = false;
-            stop();
+            data.takeDamage(1);
+            if (data.getHealthPoints() == 0) {
+            	gameon = false;
+            	stop();
+            }else {
+            	isInvulnerable = true;
+            }
           } else {
 
             if (p.getPosition().x < HardCodedParameters.maxX - 50 && p.getPosition().x > 0)
@@ -129,6 +144,7 @@ public class Engine implements EngineService, RequireDataService {
           if (collisionHeroesShrimp(f)) {
             data.setSoundEffect(Sound.SOUND.HeroesGotHit);
             score++;
+            data.restoreHealth(1);
           } else {
             shrimps.add(f);
           }

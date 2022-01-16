@@ -20,4 +20,6 @@ public interface WriteService {
   public void addShark2(Position p);
   public void setSoundEffect(Sound.SOUND s);
   public void addScore(int score);
+  public void takeDamage(int damage);
+  public void restoreHealth(int health);
 }

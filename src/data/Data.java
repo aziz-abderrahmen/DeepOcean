@@ -28,6 +28,8 @@ public class Data implements DataService{
   private ArrayList<ShrimpService> shrimps;
   private ArrayList<SharkService> sharks;
   private ArrayList<SharkService> sharks2;
+  private int healthPoints;
+  private int maxHealthPoints;
 
 
 
@@ -45,6 +47,7 @@ public class Data implements DataService{
     shrimps = new ArrayList<ShrimpService>();
     sharks = new ArrayList<SharkService>();
     sharks2 = new ArrayList<SharkService>();
+    healthPoints = maxHealthPoints = 10;
 
 
     stepNumber = 0;
@@ -125,7 +128,7 @@ public class Data implements DataService{
   public void addShark(Position p) { sharks.add(new MoveLeftShark(p)); }
   
   @Override
-  public void addShark2(Position p) { sharks.add(new MoveLeftShark(p)); }
+  public void addShark2(Position p) { sharks2.add(new MoveLeftShark(p)); }
   
 
   
@@ -133,4 +136,25 @@ public class Data implements DataService{
   
   @Override
   public void setSoundEffect(Sound.SOUND s) { sound=s; }
+
+  @Override
+  public int getHealthPoints() {
+	  return healthPoints;
+  }
+
+  @Override
+  public void takeDamage(int damage) {
+	  healthPoints -= damage;
+	  if (healthPoints < 0) {
+		  healthPoints = 0;
+	  }
+  }
+
+@Override
+public void restoreHealth(int health) {
+	healthPoints += health;
+	if (healthPoints > maxHealthPoints) {
+		healthPoints = maxHealthPoints;
+		}
+	}
 }
