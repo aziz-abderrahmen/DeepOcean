@@ -196,8 +196,33 @@ public class Viewer implements ViewerService, RequireReadService{
     sharkAvatarViewportIndex=(sharkAvatarViewportIndex+1)%(sharkAvatarViewports.size()*spriteSlowDownRate);
 //
 
+    double healthBarScale = data.getSharkHeight()*shrink/sharkAvatarViewports.get(index).getRadius();
+    Rectangle healthBarLose = new Rectangle(100, 10);
+    healthBarLose.setFill(Color.RED);
+    healthBarLose.setTranslateX(shrink*data.getHeroesPosition().x+
+            shrink*xModifier+
+            -heroesScale*0.5*heroesAvatarViewports.get(index).getWidth()+
+            shrink*heroesScale*heroesAvatarXModifiers.get(index) - 20
+           );
+    healthBarLose.setTranslateY(shrink*data.getHeroesPosition().y+
+            shrink*yModifier+
+            -heroesScale*0.5*heroesAvatarViewports.get(index).getHeight()+
+            shrink*heroesScale*heroesAvatarYModifiers.get(index)+90);
+    
+    Rectangle healthBar = new Rectangle(data.getHealthPoints()*10, 10);
+    healthBar.setFill(Color.GREEN);
+    healthBar.setTranslateX(shrink*data.getHeroesPosition().x+
+            shrink*xModifier+
+            -heroesScale*0.5*heroesAvatarViewports.get(index).getWidth()+
+            shrink*heroesScale*heroesAvatarXModifiers.get(index) - 20
+           );
+    healthBar.setTranslateY(shrink*data.getHeroesPosition().y+
+            shrink*yModifier+
+            -heroesScale*0.5*heroesAvatarViewports.get(index).getHeight()+
+            shrink*heroesScale*heroesAvatarYModifiers.get(index)+90);
+    
     Group panel = new Group();
-    panel.getChildren().addAll(map,greets,score,heroesAvatar);
+    panel.getChildren().addAll(map,greets,score,heroesAvatar, healthBarLose, healthBar);
     
     ArrayList<ShrimpService> shrimps = data.getShrimps();
     ShrimpService f;
