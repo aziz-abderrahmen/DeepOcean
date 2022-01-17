@@ -196,30 +196,30 @@ public class Viewer implements ViewerService, RequireReadService{
     sharkAvatarViewportIndex=(sharkAvatarViewportIndex+1)%(sharkAvatarViewports.size()*spriteSlowDownRate);
 //
 
-    double healthBarScale = data.getSharkHeight()*shrink/sharkAvatarViewports.get(index).getRadius();
-    Rectangle healthBarLose = new Rectangle(100, 10);
+    double healthBarScale = data.getHeroesHeight()*shrink/heroesAvatarViewports.get(index).getHeight();
+    Rectangle healthBarLose = new Rectangle(90 * healthBarScale, 10*healthBarScale);
     healthBarLose.setFill(Color.RED);
     healthBarLose.setTranslateX(shrink*data.getHeroesPosition().x+
             shrink*xModifier+
             -heroesScale*0.5*heroesAvatarViewports.get(index).getWidth()+
-            shrink*heroesScale*heroesAvatarXModifiers.get(index) - 20
+            shrink*heroesScale*heroesAvatarXModifiers.get(index) - 5*healthBarScale
            );
     healthBarLose.setTranslateY(shrink*data.getHeroesPosition().y+
             shrink*yModifier+
             -heroesScale*0.5*heroesAvatarViewports.get(index).getHeight()+
-            shrink*heroesScale*heroesAvatarYModifiers.get(index)+90);
+            shrink*heroesScale*heroesAvatarYModifiers.get(index) + 90*healthBarScale);
     
-    Rectangle healthBar = new Rectangle(data.getHealthPoints()*10, 10);
+    Rectangle healthBar = new Rectangle(data.getHealthPoints()*30 * healthBarScale, 10*healthBarScale);
     healthBar.setFill(Color.GREEN);
     healthBar.setTranslateX(shrink*data.getHeroesPosition().x+
             shrink*xModifier+
             -heroesScale*0.5*heroesAvatarViewports.get(index).getWidth()+
-            shrink*heroesScale*heroesAvatarXModifiers.get(index) - 20
+            shrink*heroesScale*heroesAvatarXModifiers.get(index) - 5*healthBarScale
            );
     healthBar.setTranslateY(shrink*data.getHeroesPosition().y+
             shrink*yModifier+
             -heroesScale*0.5*heroesAvatarViewports.get(index).getHeight()+
-            shrink*heroesScale*heroesAvatarYModifiers.get(index)+90);
+            shrink*heroesScale*heroesAvatarYModifiers.get(index) + 90*healthBarScale);
     
     Group panel = new Group();
     panel.getChildren().addAll(map,greets,score,heroesAvatar, healthBarLose, healthBar);

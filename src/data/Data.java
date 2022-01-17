@@ -47,7 +47,7 @@ public class Data implements DataService{
     shrimps = new ArrayList<ShrimpService>();
     sharks = new ArrayList<SharkService>();
     sharks2 = new ArrayList<SharkService>();
-    healthPoints = maxHealthPoints = 10;
+    healthPoints = maxHealthPoints = 3;
 
 
     stepNumber = 0;
