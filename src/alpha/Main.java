@@ -26,6 +26,7 @@ import javafx.stage.WindowEvent;
 import javafx.event.EventHandler;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
@@ -67,31 +68,43 @@ public class Main extends Application {
   @Override
   public void start(Stage stage) {
     final Scene scene = new Scene(((Viewer) viewer).getPanel());
+    
 
-    scene.setFill(Color.BLACK);
+
+    scene.setFill(Color.DARKBLUE);
     scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
       @Override
       public void handle(KeyEvent event) {
-        if (event.getCode() == KeyCode.LEFT && engine.gameON()) {
+        if (event.getCode() == KeyCode.LEFT && data.getGameStatus()) {
           engine.setHeroesCommand(User.COMMAND.LEFT);
           viewer.setHeroesCommand(User.COMMAND.LEFT);
 
         }
-        if (event.getCode() == KeyCode.RIGHT && engine.gameON()) {
+        if (event.getCode() == KeyCode.RIGHT && data.getGameStatus()) {
           engine.setHeroesCommand(User.COMMAND.RIGHT);
           viewer.setHeroesCommand(User.COMMAND.RIGHT);
 
         }
-        if (event.getCode() == KeyCode.UP && engine.gameON()) {
+        if (event.getCode() == KeyCode.UP && data.getGameStatus()) {
           engine.setHeroesCommand(User.COMMAND.UP);
           viewer.setHeroesCommand(User.COMMAND.UP);
 
         }
-        if (event.getCode() == KeyCode.DOWN && engine.gameON()) {
+        if (event.getCode() == KeyCode.DOWN && data.getGameStatus()) {
           engine.setHeroesCommand(User.COMMAND.DOWN);
           viewer.setHeroesCommand(User.COMMAND.DOWN);
 
         }
+        
+        if (event.getCode() == KeyCode.DOWN && data.getGameStatus()) {
+            engine.setHeroesCommand(User.COMMAND.DOWN);
+            viewer.setHeroesCommand(User.COMMAND.DOWN);
+        }
+        
+		if (event.getCode() == KeyCode.R && !data.getGameStatus()) {
+			data.setGameStatus(true);
+		}
+        
 
         event.consume();
       }

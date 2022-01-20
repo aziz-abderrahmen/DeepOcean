@@ -22,4 +22,7 @@ public interface WriteService {
   public void addScore(int score);
   public void takeDamage(int damage);
   public void restoreHealth(int health);
+  public void setIsInvulnerable(boolean b);
+  public void setSpawnRate(int spawnRate);
+  public void setVitesseJeu(int vitesse);
 }

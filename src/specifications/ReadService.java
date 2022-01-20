@@ -28,4 +28,9 @@ public interface ReadService {
 
   public Sound.SOUND getSoundEffect();
   public int getHealthPoints();
+  public boolean getGameStatus();
+  public void setGameStatus(boolean status);
+  public boolean getIsInvulnerable();
+  public int getSpawnRate();
+  public int getVitesseJeu();
 }
