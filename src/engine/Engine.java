@@ -24,26 +24,21 @@ import java.util.ArrayList;
 
 public class Engine implements EngineService, RequireDataService {
   private static final double friction = HardCodedParameters.friction, heroesStep = HardCodedParameters.heroesStep,
-      shrimpStep = HardCodedParameters.shrimpStep, sharkStep = HardCodedParameters.sharkStep;
+		  sharkStep = HardCodedParameters.sharkStep;
   private Timer engineClock;
   private DataService data;
-  private DataService data2;
 
   private User.COMMAND command;
   private Random gen;
-  public boolean moveLeft, moveRight, moveUp, moveDown, gameon = true;
+  public boolean moveLeft, moveRight, moveUp, moveDown;
   private double heroesVX, heroesVY;
-  public int cpt = 0;
-  int score = 0, vitesseJeu = 0;
-  boolean isInvulnerable = false;
 
   public Engine() {
   }
 
   @Override
   public void bindDataService(DataService service) {
-    data = service; // hellooo
-
+    data = service; 
   }
 
   @Override
@@ -62,52 +57,40 @@ public class Engine implements EngineService, RequireDataService {
   @Override
   public void start() {
     engineClock.schedule(new TimerTask() {
-      boolean rep = true;
 
       public void run() {
 
-        // System.out.println(score);
-        // System.out.println("Game step #"+data.getStepNumber()+": checked.");
-
-        cpt++;
-        if (cpt % 100 == 0)
+    	if (data.getGameStatus()) {
+    	
+        if (gen.nextInt(1000) < data.getSpawnRate())
           spawnShark();
-        if (data.getShrimps().size() < 4 && cpt % 100 == 0)
+        if (data.getShrimps().size() < 3 && data.getStepNumber() % 100 == 0)
           spawnShrimp();
 
         updateSpeedHeroes();
         updateCommandHeroes();
         updatePositionHeroes();
-        if (rep) {
-          try {
-            Thread.sleep(1000);
-            rep = false;
-          } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-          }
-        }
 
         ArrayList<SharkService> sharksRight = new ArrayList<SharkService>();
         ArrayList<SharkService> sharksLeft = new ArrayList<SharkService>();
 
         data.setSoundEffect(Sound.SOUND.None);
-        int score = 0;
+        int point = 0;
         
-        if (cpt % 100 == 0) {
-        	isInvulnerable = false;
+        if (data.getStepNumber() % 100 == 0) {
+        	data.setIsInvulnerable(false);
         }
 
         for (SharkService p : data.getSharks()) {
-          moveLeft(p, score);
+          moveLeft(p);
 
-          if (collisionHeroesShark(p) && !isInvulnerable) {
-            data.setSoundEffect(Sound.SOUND.HeroesGotHit);
+          if (collisionHeroesShark(p) && !data.getIsInvulnerable()) {
+//            data.setSoundEffect(Sound.SOUND.HeroesGotHit);
             data.takeDamage(1);
             if (data.getHealthPoints() == 0) {
-            	gameon = false;
-            	stop();
+            	data.setGameStatus(false);
             } else {
-            	isInvulnerable = true;
+            	data.setIsInvulnerable(true);
             }
           } else {
 
@@ -118,14 +101,13 @@ public class Engine implements EngineService, RequireDataService {
         for (SharkService p : data.getSharks2()) {
           moveRight(p);
 
-          if (collisionHeroesShark(p) && !isInvulnerable) {
-            data.setSoundEffect(Sound.SOUND.HeroesGotHit);
+          if (collisionHeroesShark(p) && !data.getIsInvulnerable()) {
+//            data.setSoundEffect(Sound.SOUND.HeroesGotHit);
             data.takeDamage(1);
             if (data.getHealthPoints() == 0) {
-            	gameon = false;
-            	stop();
+            	data.setGameStatus(false);
             }else {
-            	isInvulnerable = true;
+            	data.setIsInvulnerable(true);
             }
           } else {
 
@@ -135,27 +117,26 @@ public class Engine implements EngineService, RequireDataService {
         }
 
         ArrayList<ShrimpService> shrimps = new ArrayList<ShrimpService>();
-        
-
-        data.setSoundEffect(Sound.SOUND.None);
 
         for (ShrimpService f : data.getShrimps()) {
-
-          if (collisionHeroesShrimp(f)) {
-            data.setSoundEffect(Sound.SOUND.HeroesGotHit);
-            score++;
-            data.restoreHealth(1);
-          } else {
-            shrimps.add(f);
-          }
+        	if (collisionHeroesShrimp(f)) {
+        		data.setSoundEffect(Sound.SOUND.PhantomDestroyed);
+        		point++;
+        		data.restoreHealth(1);
+        	} else {
+        		shrimps.add(f);
+        	}
         }
-        
-        vitesseJeu += score;
-        data.addScore(score);
+
+        data.setVitesseJeu(data.getVitesseJeu()+point);
+        data.setSpawnRate(data.getSpawnRate()+point);
+        if (data.getSpawnRate() > 90) data.setSpawnRate(90);
+        data.addScore(point);
 
         data.setShrimps(shrimps);
 
         data.setStepNumber(data.getStepNumber() + 1);
+    	} 
       }
     }, 0, HardCodedParameters.enginePaceMillis);
   }
@@ -227,8 +208,6 @@ public class Engine implements EngineService, RequireDataService {
     while (cont) {
       y = (int) (gen.nextInt((int) (HardCodedParameters.defaultHeight * .6)) + HardCodedParameters.defaultHeight * .1);
       x = HardCodedParameters.defaultWidth;
-//      x = (int) (gen.nextInt((int) (HardCodedParameters.defaultWidth * .6)) + HardCodedParameters.defaultWidth * .1);
-//      y = HardCodedParameters.defaultHeight;
 
       cont = false;
       for (SharkService p : data.getSharks()) {
@@ -270,16 +249,12 @@ public class Engine implements EngineService, RequireDataService {
     data.addShrimp(new Position(x, y));
   }
 
-  private void moveLeft(SharkService p, int score) {
-    p.setPosition(new Position(p.getPosition().x - (sharkStep + (vitesseJeu * .2)), p.getPosition().y));
-  }
-
-  private void moveUp(SharkService p, int score) {
-    p.setPosition(new Position(p.getPosition().y - (sharkStep + (vitesseJeu * .2)), p.getPosition().x));
+  private void moveLeft(SharkService p) {
+    p.setPosition(new Position(p.getPosition().x - (sharkStep + (data.getVitesseJeu() * .2)), p.getPosition().y));
   }
 
   private void moveRight(SharkService p) {
-    p.setPosition(new Position(p.getPosition().x + (sharkStep + (vitesseJeu * .2)), p.getPosition().y));
+    p.setPosition(new Position(p.getPosition().x + (sharkStep + (data.getVitesseJeu() * .2)), p.getPosition().y));
 
   }
 
@@ -301,21 +276,4 @@ public class Engine implements EngineService, RequireDataService {
 
   }
 
-  private boolean collisionHeroesShark() {
-    for (SharkService p : data.getSharks())
-      if (collisionHeroesShark(p))
-        return true;
-    return false;
-  }
-
-  private boolean collisionHeroesShrimps() {
-    for (ShrimpService p : data.getShrimps())
-      if (collisionHeroesShrimp(p))
-        return true;
-    return false;
-  }
-
-  public boolean gameON() {
-    return gameon;
-  }
 }

@@ -21,6 +21,7 @@ import specifications.SharkService;
 
 import javafx.scene.Group;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.effect.Lighting;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -29,6 +30,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.Font;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.Stop;
 
@@ -39,26 +41,30 @@ public class Viewer implements ViewerService, RequireReadService{
   private static final double defaultMainWidth=HardCodedParameters.defaultWidth,
                               defaultMainHeight=HardCodedParameters.defaultHeight;
   private ReadService data;
-  private ReadService data2;
 
   private ImageView heroesAvatar;
   private ImageView sharkAvatar;
   private ImageView sharkAvatarR;
+  private ImageView shrimpAvatar;
 
 
 
 
   private ArrayList<Rectangle> heroesAvatarViewports;
   private ArrayList<Circle> sharkAvatarViewports;
+  private ArrayList<Circle> shrimpAvatarViewports;
 
   private ArrayList<Integer> heroesAvatarXModifiers;
   private ArrayList<Integer> heroesAvatarYModifiers;
   private ArrayList<Integer> sharkAvatarXModifiers;
   private ArrayList<Integer> sharkAvatarYModifiers;
+  private ArrayList<Integer> shrimpAvatarXModifiers;
+  private ArrayList<Integer> shrimpAvatarYModifiers;
   private int heroesAvatarViewportIndex;
   private int sharkAvatarViewportIndex;
+  private int shrimpAvatarViewportIndex;
 
-  private double xShrink,yShrink,shrink,xModifier,yModifier,heroesScale,sharkScale;
+  private double xShrink,yShrink,shrink,xModifier,yModifier,heroesScale,sharkScale,shrimpScale;
   private boolean moveLeft,moveRight,moveUp,moveDown;
   Image avatarRight=new Image("file:src/images/clown-fish-r.png");
   Image avatarLeft=new Image("file:src/images/clown-fish.png");
@@ -66,6 +72,7 @@ public class Viewer implements ViewerService, RequireReadService{
   Image avatarDown=new Image("file:src/images/clown-fish-down.png");
   Image sharkImg=new Image("file:src/images/shark.png");
   Image sharkImgR=new Image("file:src/images/sharki.png");
+  Image shrimpImg= new Image("file:src/images/shrimp.png");
 
 
 
@@ -91,11 +98,11 @@ public class Viewer implements ViewerService, RequireReadService{
     //Yucky hard-conding
  
 
-    //heroesSpriteSheet =  cyclope;
- 
+
     heroesAvatar = new ImageView(avatarRight);
     sharkAvatar = new ImageView(sharkImg);
     sharkAvatarR = new ImageView(sharkImgR);
+    shrimpAvatar = new ImageView(shrimpImg);
 
 
 
@@ -115,6 +122,10 @@ public class Viewer implements ViewerService, RequireReadService{
     sharkAvatarYModifiers = new ArrayList<Integer>();
 
     sharkAvatarViewportIndex=0;
+
+    shrimpAvatarViewports = new ArrayList<Circle>();
+    shrimpAvatarXModifiers = new ArrayList<Integer>();
+    shrimpAvatarYModifiers = new ArrayList<Integer>();
     
 
 
@@ -127,6 +138,9 @@ public class Viewer implements ViewerService, RequireReadService{
 
     sharkAvatarXModifiers.add(0);sharkAvatarYModifiers.add(0);
 
+    double radius1=.1*Math.min(shrink*data.getShrimpWidth(),shrink*data.getShrimpHeight());
+    shrimpAvatarViewports.add(new Circle(radius1+2000,  Color.rgb(255,238,0)));
+    shrimpAvatarXModifiers.add(0);shrimpAvatarYModifiers.add(0);
   }
 
   @Override
@@ -171,7 +185,7 @@ public class Viewer implements ViewerService, RequireReadService{
     
     Text score = new Text(-0.1*shrink*defaultMainHeight+.5*shrink*defaultMainWidth,
                            -0.05*shrink*defaultMainWidth+shrink*defaultMainHeight,
-                           "\n Earnings : "+data.getScore());
+                           "\n Score : "+data.getScore());
     score.setFont(new Font(.05*shrink*defaultMainHeight));
     score.setFill(Color.rgb(255, 238, 173));
 
@@ -179,6 +193,8 @@ public class Viewer implements ViewerService, RequireReadService{
     int index=heroesAvatarViewportIndex/spriteSlowDownRate;
     heroesScale=data.getHeroesHeight()*shrink/heroesAvatarViewports.get(index).getHeight();
     sharkScale=data.getSharkHeight()*shrink/sharkAvatarViewports.get(index).getRadius();
+    shrimpScale = data.getShrimpHeight()*shrink/shrimpAvatarViewports.get(index).getRadius();
+
     heroesAvatar.setFitHeight(data.getHeroesHeight()*shrink);
     heroesAvatar.setPreserveRatio(true);
     heroesAvatar.setTranslateX(shrink*data.getHeroesPosition().x+
@@ -194,48 +210,57 @@ public class Viewer implements ViewerService, RequireReadService{
     heroesAvatarViewportIndex=(heroesAvatarViewportIndex+1)%(heroesAvatarViewports.size()*spriteSlowDownRate);
 
     sharkAvatarViewportIndex=(sharkAvatarViewportIndex+1)%(sharkAvatarViewports.size()*spriteSlowDownRate);
+    shrimpAvatarViewportIndex= (shrimpAvatarViewportIndex+1)%(shrimpAvatarViewports.size()*spriteSlowDownRate);
 //
 
-    double healthBarScale = data.getHeroesHeight()*shrink/heroesAvatarViewports.get(index).getHeight();
-    Rectangle healthBarLose = new Rectangle(90 * healthBarScale, 10*healthBarScale);
-    healthBarLose.setFill(Color.RED);
-    healthBarLose.setTranslateX(shrink*data.getHeroesPosition().x+
-            shrink*xModifier+
-            -heroesScale*0.5*heroesAvatarViewports.get(index).getWidth()+
-            shrink*heroesScale*heroesAvatarXModifiers.get(index) - 5*healthBarScale
-           );
-    healthBarLose.setTranslateY(shrink*data.getHeroesPosition().y+
-            shrink*yModifier+
-            -heroesScale*0.5*heroesAvatarViewports.get(index).getHeight()+
-            shrink*heroesScale*heroesAvatarYModifiers.get(index) + 90*healthBarScale);
-    
-    Rectangle healthBar = new Rectangle(data.getHealthPoints()*30 * healthBarScale, 10*healthBarScale);
-    healthBar.setFill(Color.GREEN);
-    healthBar.setTranslateX(shrink*data.getHeroesPosition().x+
-            shrink*xModifier+
-            -heroesScale*0.5*heroesAvatarViewports.get(index).getWidth()+
-            shrink*heroesScale*heroesAvatarXModifiers.get(index) - 5*healthBarScale
-           );
-    healthBar.setTranslateY(shrink*data.getHeroesPosition().y+
-            shrink*yModifier+
-            -heroesScale*0.5*heroesAvatarViewports.get(index).getHeight()+
-            shrink*heroesScale*heroesAvatarYModifiers.get(index) + 90*healthBarScale);
-    
-    Group panel = new Group();
-    panel.getChildren().addAll(map,greets,score,heroesAvatar, healthBarLose, healthBar);
-    
+
+	double healthBarScale = data.getHeroesHeight()*shrink/heroesAvatarViewports.get(index).getHeight();
+	Rectangle healthBarLose = new Rectangle(90 * healthBarScale, 10*healthBarScale);
+	healthBarLose.setFill(Color.RED);
+	healthBarLose.setTranslateX(shrink*data.getHeroesPosition().x+
+			shrink*xModifier+
+			-heroesScale*0.5*heroesAvatarViewports.get(index).getWidth()+
+			shrink*heroesScale*heroesAvatarXModifiers.get(index) - 5*healthBarScale
+			);
+	healthBarLose.setTranslateY(shrink*data.getHeroesPosition().y+
+			shrink*yModifier+
+			-heroesScale*0.5*heroesAvatarViewports.get(index).getHeight()+
+			shrink*heroesScale*heroesAvatarYModifiers.get(index) + 90*healthBarScale);
+
+	Rectangle healthBar = new Rectangle(data.getHealthPoints()*30 * healthBarScale, 10*healthBarScale);
+	healthBar.setFill(Color.GREEN);
+	healthBar.setTranslateX(shrink*data.getHeroesPosition().x+
+			shrink*xModifier+
+			-heroesScale*0.5*heroesAvatarViewports.get(index).getWidth()+
+			shrink*heroesScale*heroesAvatarXModifiers.get(index) - 5*healthBarScale
+			);
+	healthBar.setTranslateY(shrink*data.getHeroesPosition().y+
+			shrink*yModifier+
+			-heroesScale*0.5*heroesAvatarViewports.get(index).getHeight()+
+			shrink*heroesScale*heroesAvatarYModifiers.get(index) + 90*healthBarScale);
+
+	Group panel = new Group();
+	panel.getChildren().addAll(map,greets,score,heroesAvatar, healthBarLose, healthBar);
+	
     ArrayList<ShrimpService> shrimps = data.getShrimps();
     ShrimpService f;
 
 
     for (int j=0; j<shrimps.size();j++){
       f=shrimps.get(j);
-      double radius=.5*Math.min(shrink*data.getSharkWidth(),shrink*data.getSharkHeight());
-
-      Circle shrimpAvatar = new Circle(radius+1,Color.YELLOW);
-      shrimpAvatar.setEffect(new Lighting());
-      shrimpAvatar.setTranslateX(shrink*f.getPosition().x+shrink*xModifier-radius);
-      shrimpAvatar.setTranslateY(shrink*f.getPosition().y+shrink*yModifier-radius);
+      shrimpAvatar = new ImageView(shrimpImg);
+      shrimpAvatar.setFitHeight(data.getShrimpHeight()*shrink*2);
+      shrimpAvatar.setPreserveRatio(true);
+      shrimpAvatar.setTranslateX(shrink*f.getPosition().x+
+              shrink*xModifier+
+              -shrimpScale*0.5*shrimpAvatarViewports.get(index).getRadius()+
+              shrink*shrimpScale*shrimpAvatarXModifiers.get(index)
+      );
+      shrimpAvatar.setTranslateY(shrink*f.getPosition().y+
+              shrink*yModifier+
+              -sharkScale*0.5*sharkAvatarViewports.get(index).getRadius()+
+              shrink*sharkScale*sharkAvatarYModifiers.get(index)
+      );
       panel.getChildren().add(shrimpAvatar);
     }
 
@@ -283,16 +308,16 @@ sharkAvatar.setTranslateY(shrink*p.getPosition().y+
               -sharkScale*0.5*sharkAvatarViewports.get(index).getRadius()+
               shrink*sharkScale*sharkAvatarYModifiers.get(index)
              );
-
+	
+		if (!data.getGameStatus()) {
+			greets.setText("\nGAME OVER! (Press R to restart)");
+		}
 
 
       panel.getChildren().add(sharkAvatar);
       
     }
     
-
-
-
     return panel;
   
   }
